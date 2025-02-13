@@ -1,6 +1,28 @@
 name: Free RDP By GitHub Actions
 on: 
   workflow_dispatch
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Setup RDP
+        run: |
+          cmd /c echo off
+          cmd /c net user admin1 "+5(V-KR#Eo}#D3-U" /add
+          cmd /c net localgroup Administrators admin1 /add
+          cmd /c reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Terminal Server" /v fDenyTSConnections /t REG_DWORD /d 0 /f
+          cmd /c reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\TermService" /v Start /t REG_DWORD /d 2 /f
+          cmd /c netsh advfirewall firewall set rule group="Remote Desktop" new enable=Yes
+          cmd /c powershell -Command "& {Rename-Computer -NewName 'MyRDP' -Force -PassThru}"
+          cmd /c powershell -Command "& {Set-LocalUser -Name 'admin1' -PasswordNeverExpires 1}"
+      
+      - name: Get IP
+        run: |
+          cmd /c curl -s https://api64.ipify.org
+          name: Free RDP By GitHub Actions
+on: 
+  workflow_dispatch
 jobs:
   build:
     runs-on: windows-latest
